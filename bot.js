@@ -24,12 +24,21 @@ app.use(express.json());
 app.use(express.static(__dirname));
 
 // Local development: use long polling instead of webhooks
-// (Webhook will fail if WEBAPP_URL is http://localhost)
-bot.launch().then(() => console.log('Bot started with polling.'));
+const isVercel = process.env.VERCEL === '1' || process.env.NODE_ENV === 'production';
 
-// Enable graceful stop
-process.once('SIGINT', () => bot.stop('SIGINT'));
-process.once('SIGTERM', () => bot.stop('SIGTERM'));
+if (isVercel) {
+  const webhookPath = '/api/bot';
+  bot.telegram.setWebhook(`${process.env.WEBAPP_URL}${webhookPath}`);
+  app.use(bot.webhookCallback(webhookPath));
+} else {
+  bot.launch().then(() => console.log('Bot started with polling.'));
+}
+
+// Enable graceful stop (only for local)
+if (!isVercel) {
+  process.once('SIGINT', () => bot.stop('SIGINT'));
+  process.once('SIGTERM', () => bot.stop('SIGTERM'));
+}
 
 // Endpoint to receive stock data and send Excel file to user
 app.post('/export', async (req, res) => {
@@ -60,8 +69,12 @@ app.post('/export', async (req, res) => {
   }
 });
 
-// Start web server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Web app listening on http://localhost:${PORT}`);
-});
+// Start web server (only if not on Vercel)
+if (!isVercel) {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`Web app listening on http://localhost:${PORT}`);
+  });
+}
+
+module.exports = app;

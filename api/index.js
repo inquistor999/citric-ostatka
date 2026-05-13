@@ -21,7 +21,7 @@ bot.start((ctx) => {
 // Express server to serve front‑end and handle Excel generation
 const app = express();
 app.use(express.json());
-app.use(express.static(__dirname));
+app.use(express.static(path.join(__dirname, '../')));
 
 // Local development: use long polling instead of webhooks
 const isVercel = process.env.VERCEL === '1' || process.env.NODE_ENV === 'production';

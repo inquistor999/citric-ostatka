@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Citric Ostatka</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://telegram.org/js/telegram-web-app.js" defer></script>
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <div class="container">
+    <h1>Mahsulotlar ro‘yxati</h1>
+    <input type="text" id="search" placeholder="Mahsulotni qidiring..." />
+    <div id="product-list" class="list"></div>
+    <h2>Tanlangan mahsulotlar</h2>
+    <table id="selected-table">
+      <thead>
+        <tr><th>Mahsulot</th><th>Qoldiq miqdori</th><th>Izoh</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <button id="export-btn" class="btn-primary">Excel yuklab olish</button>
+  </div>
+</body>
+</html>

@@ -23,12 +23,13 @@ const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../')));
 
+app.get('/api/health', (req, res) => res.send('OK'));
+
 // Local development: use long polling instead of webhooks
 const isVercel = process.env.VERCEL === '1' || process.env.NODE_ENV === 'production';
 
 if (isVercel) {
   const webhookPath = '/api/bot';
-  bot.telegram.setWebhook(`${process.env.WEBAPP_URL}${webhookPath}`);
   app.use(bot.webhookCallback(webhookPath));
 } else {
   bot.launch().then(() => console.log('Bot started with polling.'));

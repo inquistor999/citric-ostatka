@@ -2,12 +2,10 @@
   "name": "citric-ostatka-bot",
   "version": "1.0.0",
   "description": "Telegram Mini App for stock tracking",
-  "main": "bot.js",
+  "main": "api/index.js",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "bot": "node bot.js"
+    "start": "node api/index.js",
+    "bot": "node api/index.js"
   },
   "dependencies": {
     "dotenv": "^16.4.5",

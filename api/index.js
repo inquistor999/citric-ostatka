@@ -55,6 +55,12 @@ app.post('/export', async (req, res) => {
   ];
   const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.aoa_to_sheet(wsData);
+  // Set column widths for a better look
+  ws['!cols'] = [
+    { wch: 50 }, // Product
+    { wch: 15 }, // Quantity
+    { wch: 40 }  // Comment
+  ];
   XLSX.utils.book_append_sheet(wb, ws, 'Ostatka');
 
   // Write workbook to buffer

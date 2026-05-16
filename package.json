@@ -5,7 +5,8 @@
   "main": "api/index.js",
   "scripts": {
     "start": "node api/index.js",
-    "bot": "node api/index.js"
+    "bot": "node api/index.js",
+    "build": "echo 'No build needed'"
   },
   "dependencies": {
     "dotenv": "^16.4.5",

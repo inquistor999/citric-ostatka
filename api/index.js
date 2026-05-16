@@ -2,7 +2,7 @@ require('dotenv').config();
 const { Telegraf } = require('telegraf');
 const express = require('express');
 const path = require('path');
-const XLSX = require('xlsx');
+const ExcelJS = require('exceljs');
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
@@ -54,31 +54,75 @@ app.post('/export', async (req, res) => {
     return res.status(400).json({ error: 'Invalid payload' });
   }
 
-  // Build worksheet data
-  const wsData = [
-    ['Mahsulot', 'Qoldiq miqdori', 'Izoh'],
-    ...items.map((it) => [it.name, it.quantity, it.comment || '']),
-  ];
-  const wb = XLSX.utils.book_new();
-  const ws = XLSX.utils.aoa_to_sheet(wsData);
-  // Set column widths for a better look
-  ws['!cols'] = [
-    { wch: 50 }, // Product
-    { wch: 15 }, // Quantity
-    { wch: 40 }  // Comment
-  ];
-  XLSX.utils.book_append_sheet(wb, ws, 'Ostatka');
-
-  // Write workbook to buffer
-  const buf = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
-
-  // Send document via Telegram bot
   try {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Ostatka');
+
+    // Add header row
+    const headerRow = worksheet.addRow(['Mahsulot', 'Qoldiq miqdori', 'Izoh']);
+    
+    // Style header row
+    headerRow.eachCell((cell) => {
+      cell.font = {
+        name: 'Arial',
+        size: 16,
+        bold: true,
+        color: { argb: 'FFFFFFFF' } // White
+      };
+      cell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FF2C3E50' } // Dark blue/grey
+      };
+      cell.alignment = {
+        vertical: 'middle',
+        horizontal: 'center'
+      };
+      cell.border = {
+        top: { style: 'thin' },
+        left: { style: 'thin' },
+        bottom: { style: 'thin' },
+        right: { style: 'thin' }
+      };
+    });
+    headerRow.height = 30;
+
+    // Add data rows
+    items.forEach((it) => {
+      const row = worksheet.addRow([it.name, it.quantity, it.comment || '']);
+      row.eachCell((cell, colNumber) => {
+        cell.font = {
+          name: 'Arial',
+          size: 14
+        };
+        cell.alignment = {
+          vertical: 'middle',
+          horizontal: colNumber === 2 ? 'center' : 'left' // Center quantity, left for others
+        };
+        cell.border = {
+          top: { style: 'thin' },
+          left: { style: 'thin' },
+          bottom: { style: 'thin' },
+          right: { style: 'thin' }
+        };
+      });
+      row.height = 25;
+    });
+
+    // Set column widths
+    worksheet.getColumn(1).width = 50; // Mahsulot
+    worksheet.getColumn(2).width = 20; // Qoldiq miqdori
+    worksheet.getColumn(3).width = 40; // Izoh
+
+    // Write to buffer
+    const buf = await workbook.xlsx.writeBuffer();
+
+    // Send document via Telegram bot
     await bot.telegram.sendDocument(chat_id, { source: buf, filename: 'ostatka.xlsx' });
     res.json({ status: 'sent' });
   } catch (e) {
-    console.error('Telegram send error:', e);
-    res.status(500).json({ error: 'Failed to send file' });
+    console.error('Export error:', e);
+    res.status(500).json({ error: 'Failed to generate/send file' });
   }
 });
 

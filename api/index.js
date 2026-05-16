@@ -30,6 +30,12 @@ const isVercel = process.env.VERCEL === '1' || process.env.NODE_ENV === 'product
 
 if (isVercel) {
   const webhookPath = '/api/bot';
+  const url = process.env.WEBAPP_URL;
+  if (url) {
+    bot.telegram.setWebhook(`${url}${webhookPath}`).catch(err => {
+      console.error('Error setting webhook:', err);
+    });
+  }
   app.use(bot.webhookCallback(webhookPath));
 } else {
   bot.launch().then(() => console.log('Bot started with polling.'));
